@@ -4,6 +4,7 @@ import boto3
 import logging
 import time
 import uuid
+import re
 from typing import Dict, Iterator
 
 # Configure logging
@@ -22,6 +23,29 @@ except ImportError:
 
 # Initialize Bedrock client
 bedrock = boto3.client('bedrock-runtime')
+
+def estimate_tokens(text: str) -> int:
+    """
+    Estimate the number of tokens in a text string.
+    This is an approximation based on GPT tokenization rules.
+    """
+    # Simple approximation: 4 chars ≈ 1 token for English text
+    # This is a rough estimate - actual tokenization depends on the model
+    if not text:
+        return 0
+        
+    # Count words (roughly correlates with tokens for English text)
+    words = len(re.findall(r'\b\w+\b', text))
+    
+    # For languages with spaces, tokens are often slightly fewer than words
+    estimated_tokens = max(1, int(words * 1.3))
+    
+    # For JSON or code, add a complexity factor
+    if '{' in text and '}' in text:
+        estimated_tokens = int(estimated_tokens * 1.2)
+    
+    logger.info(f"Estimated token count for text: {estimated_tokens}")
+    return estimated_tokens
 
 def format_to_html(text: str) -> str:
     """Convert plain text to formatted HTML with nice styling"""
@@ -177,6 +201,9 @@ def trace_bedrock_call(task_type, model_id, prompt, has_newrelic=False):
     """A helper function to trace Bedrock API calls with or without New Relic"""
     start_time = time.time()
     
+    # Estimate input tokens
+    input_tokens = estimate_tokens(prompt)
+    
     try:
         # Make the API call
         if task_type == 'text':
@@ -201,12 +228,58 @@ def trace_bedrock_call(task_type, model_id, prompt, has_newrelic=False):
         duration = time.time() - start_time
         logger.info(f"Bedrock {task_type} generation completed in {duration:.2f}s")
         
-        # Record custom metric in New Relic if available
+        # Estimate output tokens for text generation
+        output_tokens = 0
+        if task_type == 'text':
+            output_text = ""
+            if "outputText" in result:
+                output_text = result["outputText"]
+            elif "results" in result and isinstance(result["results"], list) and len(result["results"]) > 0:
+                output_text = result["results"][0].get("outputText", "")
+            elif "generation" in result:
+                output_text = result["generation"]
+            elif "completion" in result:
+                output_text = result["completion"]
+                
+            output_tokens = estimate_tokens(output_text)
+            logger.info(f"Text generation - Input tokens: {input_tokens}, Output tokens: {output_tokens}")
+        
+        # Record custom metrics in New Relic if available
         if has_newrelic:
+            # Record duration
             newrelic.agent.record_custom_metric(
                 f'Custom/Bedrock/{task_type}_generation_time', 
                 duration
             )
+            
+            # Record token usage
+            current_transaction = newrelic.agent.current_transaction()
+            if current_transaction:
+                current_transaction.add_custom_attribute('input_tokens', input_tokens)
+                if task_type == 'text':
+                    current_transaction.add_custom_attribute('output_tokens', output_tokens)
+                    current_transaction.add_custom_attribute('total_tokens', input_tokens + output_tokens)
+                    
+                    # Record token metrics for aggregation
+                    newrelic.agent.record_custom_metric(
+                        f'Custom/Bedrock/input_tokens', 
+                        input_tokens
+                    )
+                    newrelic.agent.record_custom_metric(
+                        f'Custom/Bedrock/output_tokens', 
+                        output_tokens
+                    )
+                    newrelic.agent.record_custom_metric(
+                        f'Custom/Bedrock/total_tokens', 
+                        input_tokens + output_tokens
+                    )
+                    
+                    # Record tokens per model
+                    model_short_name = model_id.split('.')[-1] if '.' in model_id else model_id
+                    newrelic.agent.record_custom_metric(
+                        f'Custom/Bedrock/Models/{model_short_name}/tokens', 
+                        input_tokens + output_tokens
+                    )
         
         return result
     except Exception as e:
@@ -250,6 +323,19 @@ def handler(event, context):
                 current_transaction.add_custom_attribute('ai_task', task)
                 current_transaction.add_custom_attribute('streaming_enabled', stream_mode)
                 current_transaction.add_custom_attribute('prompt_length', len(prompt))
+                
+                # Add the model for cost analysis
+                # Extract model family for cost tracking
+                if 'claude' in model_id.lower():
+                    model_family = 'claude'
+                elif 'titan' in model_id.lower():
+                    model_family = 'titan'
+                elif 'llama' in model_id.lower():
+                    model_family = 'llama'
+                else:
+                    model_family = 'other'
+                
+                current_transaction.add_custom_attribute('model_family', model_family)
         
         # Call Bedrock API using our helper function
         if task == 'text':

@@ -55,6 +55,9 @@ chat_function = aws.lambda_.Function("chat-function",
     handler="newrelic_lambda_wrapper.handler",  # Direct handler
     code=pulumi.AssetArchive({".": pulumi.FileArchive("./src")}),
     layers=[NEW_RELIC_LAYER_ARN],
+    tags={
+        "NR.Apm.Lambda.Mode": "true"  # Enable New Relic APM Lambda Mode
+    },
     environment={
         "variables": {
             # Basic New Relic Configuration
@@ -84,7 +87,9 @@ chat_function = aws.lambda_.Function("chat-function",
             # Metadata for better categorization
             "NEW_RELIC_APP_NAME": "AI-Bedrock-Serverless",
             "NEW_RELIC_METADATA_DEPLOYMENT": "Pulumi",
-            "NEW_RELIC_METADATA_SERVICE": "AI-Generation-Service"
+            "NEW_RELIC_METADATA_SERVICE": "AI-Generation-Service",
+
+            "NEW_RELIC_APM_LAMBDA_MODE": "true"
         }
     },
     memory_size=256,

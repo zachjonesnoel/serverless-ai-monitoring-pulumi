@@ -5,7 +5,7 @@ import os
 
 NEW_RELIC_LICENSE_KEY = os.environ.get("NEW_RELIC_LICENSE_KEY")
 NEW_RELIC_ACCOUNT_ID = os.environ.get("NEW_RELIC_ACCOUNT_ID")
-NEW_RELIC_LAYER_ARN = "arn:aws:lambda:us-east-1:451483290750:layer:NewRelicPython39:100"  # Replace <region> and version as needed
+NEW_RELIC_LAYER_ARN = "arn:aws:lambda:us-east-1:451483290750:layer:NewRelicPython39:99"  # Replace <region> and version as needed
 
 lambda_role = aws.iam.Role("lambda-role",
     assume_role_policy=json.dumps({
@@ -49,15 +49,15 @@ cloudwatch_policy = aws.iam.RolePolicy("cloudwatch-policy",
     })
 )
 
-chat_function = aws.lambda_.Function("chat-function",
+chat_function = aws.lambda_.Function("chat-bedrock-ai-demo",
     role=lambda_role.arn,
     runtime="python3.9",
     handler="newrelic_lambda_wrapper.handler",  # Direct handler
     code=pulumi.AssetArchive({".": pulumi.FileArchive("./src")}),
     layers=[NEW_RELIC_LAYER_ARN],
-    tags={
-        "NR.Apm.Lambda.Mode": "true"  # Enable New Relic APM Lambda Mode
-    },
+    # tags={
+    #     "NR.Apm.Lambda.Mode": "true"  # Enable New Relic APM Lambda Mode
+    # },
     environment={
         "variables": {
             # Basic New Relic Configuration
@@ -85,11 +85,11 @@ chat_function = aws.lambda_.Function("chat-function",
             "NEW_RELIC_AI_MONITORING_RECORD_CONTENT_ENABLED": "true",
             
             # Metadata for better categorization
-            "NEW_RELIC_APP_NAME": "AI-Bedrock-Serverless",
-            "NEW_RELIC_METADATA_DEPLOYMENT": "Pulumi",
-            "NEW_RELIC_METADATA_SERVICE": "AI-Generation-Service",
+            # "NEW_RELIC_APP_NAME": "AI-Bedrock-Serverless",
+            # "NEW_RELIC_METADATA_DEPLOYMENT": "Pulumi",
+            # "NEW_RELIC_METADATA_SERVICE": "AI-Generation-Service",
 
-            "NEW_RELIC_APM_LAMBDA_MODE": "true"
+            # "NEW_RELIC_APM_LAMBDA_MODE": "true"
         }
     },
     memory_size=256,

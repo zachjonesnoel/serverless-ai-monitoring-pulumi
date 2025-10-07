@@ -207,18 +207,76 @@ def trace_bedrock_call(task_type, model_id, prompt, has_newrelic=False):
     try:
         # Make the API call
         if task_type == 'text':
-            response = bedrock.invoke_model(
-                modelId=model_id,
-                contentType='application/json',
-                accept='application/json',
-                body=json.dumps({"inputText": prompt})
-            )
+            if model_id == 'amazon.titan-text-lite-v1':
+                response = bedrock.invoke_model(
+                    modelId=model_id,
+                    body=json.dumps(
+                        {
+                            "inputText": prompt, 
+                            "textGenerationConfig": {
+                                "maxTokenCount": 512,
+                                "temperature": 0.5,
+                            }
+                        }
+                    )
+                )
+            elif model_id == 'us.amazon.nova-lite-v1:0':
+                system_list = [
+                            {
+                                "text": "Act as a subject matter expert. When the user provides you with a topic, explain about that topic."
+                            }
+                ]
+                message_list = [{"role": "user", "content": [{"text": prompt}]}]
+                inf_params = {"maxTokens": 500, "topP": 0.9, "topK": 20, "temperature": 0.7}
+                response = bedrock.invoke_model(
+                    modelId=model_id,
+                    body=json.dumps(
+                        {
+                            "schemaVersion": "messages-v1",
+                            "messages": message_list,
+                            "system": system_list,
+                            "inferenceConfig": inf_params,
+                        }
+                    )
+                )
+            elif model_id == 'mistral.mistral-7b-instruct-v0:2':
+                formatted_prompt = f"""
+                <s>[INST]
+                {prompt}
+                [/INST]
+                """
+                response = bedrock.invoke_model(
+                    modelId=model_id,
+                    body=json.dumps({
+                        "prompt":  formatted_prompt,
+                        "max_tokens": 400,
+                        "temperature": 0.7,
+                        "top_p": 0.7,
+                        "top_k": 50
+                    })
+                )
+            elif model_id == 'meta.llama3-8b-instruct-v1:0':
+                formatted_prompt = f"""
+                <|begin_of_text|><|start_header_id|>user<|end_header_id|>
+                {prompt}
+                <|eot_id|>
+                <|start_header_id|>assistant<|end_header_id|>
+                """
+                response = bedrock.invoke_model(
+                    modelId=model_id,
+                    body=json.dumps({
+                        "prompt": formatted_prompt,
+                        "max_gen_len": 512,
+                        "temperature": 0.5,
+                    })
+                )
+
         else:  # image
             response = bedrock.invoke_model(
                 modelId=model_id,
                 contentType='application/json',
                 accept='application/json',
-                body=json.dumps({"inputText": prompt, "taskType": "image"})
+                body=json.dumps({"prompt": prompt, "max_tokens": "image"})
             )
         
         # Parse the response
@@ -340,14 +398,20 @@ def handler(event, context):
         # Call Bedrock API using our helper function
         if task == 'text':
             result = trace_bedrock_call('text', model_id, prompt, HAS_NEWRELIC)
-            
+            logger.info(f"Text generation completed: {result}")
             # If streaming is requested, use the streaming response format
             if stream_mode:
                 return stream_response(result)
             else:
                 # Return formatted HTML for non-streaming response
+                # if model_id == "amazon.titan-text-express-v1":
+                #     responseGenerated = result.get("results", [{}])[0].get("outputText", "No content generated")
+                # elif model_id == "us.amazon.nova-lite-v1:0":
+                #     responseGenerated = result.get("outputs", [{}])[0].get("text", "No content generated")
+                # elif model_id == "mistral.mistral-7b-instruct-v0:2":
+                #     responseGenerated = result.get("results", [{}])[0].get("outputText", "No content generated")
                 html_content = format_to_html(
-                    result.get("results", [{}])[0].get("outputText", "No content generated")
+                    json.dumps(result)
                 )
                 return {
                     "statusCode": 200,

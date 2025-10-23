@@ -26,9 +26,12 @@ bedrock_policy = aws.iam.RolePolicy("bedrock-policy",
             "Effect": "Allow",
             "Action": [
                 "bedrock:InvokeModel",
-                "bedrock:ListFoundationModels"
+                "bedrock:ListFoundationModels",
+                "bedrock:InvokeModelWithResponseStream"
             ],
-            "Resource": "*"
+            "Resource": [
+				"arn:aws:bedrock:*::foundation-model/*"
+			]
         }]
     })
 )

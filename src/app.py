@@ -270,6 +270,21 @@ def trace_bedrock_call(task_type, model_id, prompt, has_newrelic=False):
                         "temperature": 0.5,
                     })
                 )
+            elif model_id == 'us.anthropic.claude-haiku-4-5-20251001-v1:0':
+                formatted_prompt = f"""
+                \n\nHuman:
+                {prompt}
+                \n\nAssistant:
+                """
+                response = bedrock.invoke_model(
+                    modelId=model_id,
+                    body=json.dumps({
+                        "prompt": prompt,
+                        "max_tokens_to_sample": 300,
+                        "temperature": 0.1,
+                        "top_p": 0.9,
+                    })
+                )
 
         else:  # image
             response = bedrock.invoke_model(

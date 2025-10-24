@@ -27,12 +27,32 @@ bedrock_policy = aws.iam.RolePolicy("bedrock-policy",
             "Action": [
                 "bedrock:InvokeModel",
                 "bedrock:ListFoundationModels",
-                "bedrock:InvokeModelWithResponseStream"
+                "bedrock:InvokeModelWithResponseStream",
+                "bedrock:GetInferenceProfile",
+                "bedrock:ListInferenceProfiles"
             ],
             "Resource": [
-				"arn:aws:bedrock:*::foundation-model/*"
+				"arn:aws:bedrock:*::foundation-model/*",
+                "arn:aws:bedrock:*::inference-profile/*",
+                "arn:aws:bedrock:*::inference-profile/us.anthropic.claude-haiku-4-5-20251001-v1:0",
+                "arn:aws:bedrock:*::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0"
 			]
-        }]
+        },
+        {
+            "Sid": "MarketplaceAccess",
+            "Effect": "Allow",
+            "Action": [
+                "aws-marketplace:ViewSubscriptions",
+                "aws-marketplace:Subscribe"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:CalledViaLast": "bedrock.amazonaws.com"
+                }
+            }
+        }
+        ]
     })
 )
 

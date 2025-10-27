@@ -279,7 +279,7 @@ def trace_bedrock_call(task_type, model_id, prompt, has_newrelic=False):
                 response = bedrock.invoke_model(
                     modelId=model_id,
                     body=json.dumps({
-                        "prompt": prompt,
+                        "prompt": formatted_prompt,
                         "max_tokens_to_sample": 300,
                         "temperature": 0.1,
                         "top_p": 0.9,

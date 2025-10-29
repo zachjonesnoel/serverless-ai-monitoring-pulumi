@@ -205,6 +205,9 @@ def trace_bedrock_call(task_type, model_id, prompt, has_newrelic=False):
     input_tokens = estimate_tokens(prompt)
     
     try:
+        # Initialize response variable
+        response = None
+        
         # Make the API call
         if task_type == 'text':
             if model_id == 'amazon.titan-text-lite-v1':
@@ -285,6 +288,9 @@ def trace_bedrock_call(task_type, model_id, prompt, has_newrelic=False):
                         "top_p": 0.9,
                     })
                 )
+            else:
+                # If model_id doesn't match any known model, raise an error
+                raise ValueError(f"Unsupported text model: {model_id}")
 
         else:  # image
             response = bedrock.invoke_model(
@@ -293,6 +299,10 @@ def trace_bedrock_call(task_type, model_id, prompt, has_newrelic=False):
                 accept='application/json',
                 body=json.dumps({"prompt": prompt, "max_tokens": "image"})
             )
+        
+        # Check if response was set
+        if response is None:
+            raise ValueError(f"No response generated for model: {model_id}")
         
         # Parse the response
         result = json.loads(response['body'].read())

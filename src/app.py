@@ -223,7 +223,7 @@ def trace_bedrock_call(task_type, model_id, prompt, has_newrelic=False):
                         }
                     )
                 )
-            elif model_id == 'us.amazon.nova-lite-v1:0':
+            elif model_id == 'amazon.nova-micro-v1:0':
                 system_list = [
                             {
                                 "text": "Act as a subject matter expert. When the user provides you with a topic, explain about that topic."
@@ -243,15 +243,14 @@ def trace_bedrock_call(task_type, model_id, prompt, has_newrelic=False):
                     )
                 )
             elif model_id == 'mistral.mistral-7b-instruct-v0:2':
-                formatted_prompt = f"""
-                <s>[INST]
-                {prompt}
-                [/INST]
-                """
+                formatted_prompt = f"""<s>[INST]
+{prompt}
+[/INST]
+"""
                 response = bedrock.invoke_model(
                     modelId=model_id,
                     body=json.dumps({
-                        "prompt":  formatted_prompt,
+                        "prompt": formatted_prompt,
                         "max_tokens": 400,
                         "temperature": 0.7,
                         "top_p": 0.7,
@@ -259,12 +258,11 @@ def trace_bedrock_call(task_type, model_id, prompt, has_newrelic=False):
                     })
                 )
             elif model_id == 'meta.llama3-8b-instruct-v1:0':
-                formatted_prompt = f"""
-                <|begin_of_text|><|start_header_id|>user<|end_header_id|>
-                {prompt}
-                <|eot_id|>
-                <|start_header_id|>assistant<|end_header_id|>
-                """
+                formatted_prompt = f"""<|begin_of_text|><|start_header_id|>user<|end_header_id|>
+{prompt}
+<|eot_id|>
+<|start_header_id|>assistant<|end_header_id|>
+"""
                 response = bedrock.invoke_model(
                     modelId=model_id,
                     body=json.dumps({
@@ -274,11 +272,10 @@ def trace_bedrock_call(task_type, model_id, prompt, has_newrelic=False):
                     })
                 )
             elif model_id == 'us.anthropic.claude-haiku-4-5-20251001-v1:0':
-                formatted_prompt = f"""
-                \n\nHuman:
-                {prompt}
-                \n\nAssistant:
-                """
+                formatted_prompt = f"""\n\nHuman:
+{prompt}
+\n\nAssistant:
+"""
                 response = bedrock.invoke_model(
                     modelId=model_id,
                     body=json.dumps({

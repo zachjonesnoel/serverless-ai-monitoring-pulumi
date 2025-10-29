@@ -33,10 +33,10 @@ with st.sidebar:
 
 # Model options
 TEXT_MODELS = {
+    "Amazon Nova Micro": "amazon.nova-micro-v1:0",
     "Mistral 7B Instruct": "mistral.mistral-7b-instruct-v0:2",
     "Meta Llama 3 8B Instruct": "meta.llama3-8b-instruct-v1:0",
     "Anthropic Claude Haiku 4.5": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
-    "Amazon Nova Micro": "amazon.nova-micro-v1:0",
 }
 
 IMAGE_MODELS = {

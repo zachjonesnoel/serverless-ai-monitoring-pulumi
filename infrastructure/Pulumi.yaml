@@ -1,0 +1,3 @@
+name: ai-lambda-pulumi
+runtime: python
+description: Serverless AI app with Pulumi, AWS Lambda, Bedrock, and New Relic

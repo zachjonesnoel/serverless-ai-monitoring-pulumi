@@ -1,8 +1,19 @@
-# Python
+# =============================================================================
+# AI Lambda Pulumi Project - Comprehensive .gitignore
+# =============================================================================
+
+# =============================================================================
+# Python / Lambda Backend
+# =============================================================================
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# C extensions
 *.so
+
+# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -16,41 +27,344 @@ parts/
 sdist/
 var/
 wheels/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Virtual environments
 venv/
 .venv/
 env/
 ENV/
-.env
+env.bak/
+venv.bak/
 
-# Pulumi
+# =============================================================================
+# Node.js / React Frontend
+# =============================================================================
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Bower dependency directory
+bower_components
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# Build outputs
+apps/frontend/build/
+apps/frontend/dist/
+
+# =============================================================================
+# Pulumi Infrastructure
+# =============================================================================
+# Pulumi state and configuration
 .pulumi/
 Pulumi.*.yaml
 !Pulumi.yaml
 
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-.DS_Store
+# Pulumi outputs that might contain sensitive data
+pulumi-outputs-*.json
 
-# Project specific
-*.log
-.coverage
-htmlcov/
-.pytest_cache/
-
-# Environment variables
+# =============================================================================
+# Environment Variables & Secrets
+# =============================================================================
+# Environment files (these may contain sensitive data)
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# Sensitive information (never commit these)
+# AWS credentials
+.aws/
+credentials.json
+
+# SSH keys and certificates
 *.pem
 *.key
-credentials.json
+*.crt
+*.p12
+*.pfx
+
+# New Relic sensitive files
+newrelic.ini
+
+# =============================================================================
+# AWS & Cloud
+# =============================================================================
+# AWS SAM
+.aws-sam/
+
+# Terraform (in case it's added later)
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# CDK (in case it's added later)
+cdk.out/
+cdk.context.json
+
+# =============================================================================
+# IDE and Editor Files
+# =============================================================================
+# VSCode
+.vscode/
+*.code-workspace
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Nano
+*.save
+
+# =============================================================================
+# Operating System Files
+# =============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.tmp
+*.temp
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# Logs and Temporary Files
+# =============================================================================
+# Log files
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# =============================================================================
+# Project Specific
+# =============================================================================
+# Build artifacts
+/build/
+/dist/
+
+# Local development files
+.local
+.cache/
+
+# Documentation builds
+docs/_build/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Archive files (unless they're meant to be versioned)
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# =============================================================================
+# AI/ML Specific (for future extensions)
+# =============================================================================
+# Model files (these can be large)
+*.model
+*.pkl
+*.pickle
+*.joblib
+*.h5
+*.hdf5
+*.pb
+
+# Dataset files
+*.csv
+*.json
+*.parquet
+data/
+datasets/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# =============================================================================
+# Security & Compliance
+# =============================================================================
+# Never commit these sensitive files
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.jks
+*.keystore
+secrets.json
+secret.*
+*secret*
+*password*
+*credentials*
+
+# API keys and tokens
+api_keys.txt
+tokens.txt
+.env.secrets
+
+# =============================================================================
+# Performance and Monitoring
+# =============================================================================
+# Performance test results
+perf/
+benchmark/
+.benchmark/
+
+# Monitoring data
+monitoring/
+metrics/
+
+# =============================================================================
+# Custom Exclusions for This Project
+# =============================================================================
+# Lambda deployment packages
+lambda-deployment-*.zip
+
+# CloudFormation/CDK generated files
+template.yaml
+template.json
+
+# Frontend bundle analysis
+bundle-report.html
+bundle-stats.json
+
+# Pulumi stack outputs (may contain sensitive URLs)
+stack-outputs.json
